@@ -1,3 +1,19 @@
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
+
 #include <chrono>
 #include <iostream>
 #include <random>
@@ -72,7 +88,7 @@ public:
 
 		size_t newSize = max(row_A, max(column_A, column_B));
 		newSize = static_cast<size_t> (pow(2, ceil(log2(newSize))));
-		cout << "The Size of the Matrix is: " << newSize <<endl;
+		//cout << "The Size of the Matrix is: " << newSize <<endl;
 
 		Matrix padded_A(newSize, newSize);
 		Matrix padded_B(newSize, newSize);
@@ -130,7 +146,9 @@ public:
 	}
 
 	void saveCSV(const string &filename, int precision = 6) const {
-		ofstream file(filename);
+		string directory = "data/";
+		string fullPath = directory + filename;
+		ofstream file(fullPath);
 		if(!file.is_open()) {
 			cerr << "File Bad No Open" << endl;
 			return;
@@ -166,12 +184,17 @@ public:
 			return Matrix(0,0);
 		}
 
-		Matrix result(A.numRows(), B.numColumns());
+		size_t rowsA = A.numRows();
+		size_t colsA = A.numColumns();
+		size_t colsB = B.numColumns();
 
-		for (size_t i = 0; i < A.numRows(); i++) {
-			for (size_t j = 0; j < B.numColumns(); j++) {
-			  for (size_t k = 0; k < A.numColumns(); k++)
-			    result(i,j) += A(i,k) * B(k,j);
+		Matrix result(rowsA, colsB);
+
+		for (size_t i = 0; i < rowsA; i++) {
+			for (size_t k = 0; k < colsA; k++) {
+				double temp = A(i,k);
+			  for (size_t j = 0; j < colsB; j++)
+			    result(i,j) += temp * B(k,j);
 			}
 		}
 
@@ -179,8 +202,8 @@ public:
 	}
 
 	//Uses the Strassen Algorithm for matrix multiplication
-	static Matrix StrassenAlgorithm(const Matrix &A, 
-									const Matrix &B) {
+	static Matrix StrassenAlgorithm(const Matrix &A, const Matrix &B) {
+
 		//https://www.cise.ufl.edu/~sahni/papers/strassen.pdf
 		//matrix size > 64
 
@@ -198,7 +221,6 @@ public:
 		size_t n = padded_A.numRows();
 
 		if (n <= 64) {
-			cout << "Strassen is no longer efficient." << endl;
 			Matrix fullResult = NaiveAlgorithm(padded_A, padded_B);
 			Matrix finalResult(A.numRows(), B.numColumns());
 			for (size_t i = 0; i < A.numRows(); i++) {
@@ -257,20 +279,22 @@ public:
 		Matrix B21 = subMatrix(padded_B, k, 0, k);
 		Matrix B22 = subMatrix(padded_B, k, k, k);
 
-		A.saveCSV("A_data.csv");
-		B.saveCSV("B_data.csv");
+		//DEGBURRING
+		// A.saveCSV("A_data.csv");
+		// B.saveCSV("B_data.csv");
 		
-		padded_A.saveCSV("padded_A_data.csv");
-		padded_B.saveCSV("padded_B_data.csv");
+		// padded_A.saveCSV("padded_A_data.csv");
+		// padded_B.saveCSV("padded_B_data.csv");
 
-		A11.saveCSV("A11_data.csv");
-		A12.saveCSV("A12_data.csv");
-		A21.saveCSV("A21_data.csv");
-		A22.saveCSV("A22_data.csv");
-		B11.saveCSV("B11_data.csv");
-		B12.saveCSV("B12_data.csv");
-		B21.saveCSV("B21_data.csv");
-		B22.saveCSV("B22_data.csv");
+		// A11.saveCSV("A11_data.csv");
+		// A12.saveCSV("A12_data.csv");
+		// A21.saveCSV("A21_data.csv");
+		// A22.saveCSV("A22_data.csv");
+		// B11.saveCSV("B11_data.csv");
+		// B12.saveCSV("B12_data.csv");
+		// B21.saveCSV("B21_data.csv");
+		// B22.saveCSV("B22_data.csv");
+		//DEGBURRING
 
 		Matrix M1 = StrassenAlgorithm(add(A11, A22), add(B11, B22));
 		Matrix M2 = StrassenAlgorithm(add(A21, A22), B11);
@@ -314,43 +338,31 @@ public:
 class MatrixTests {
 public:
 	//Tests the Naive Algorithm
-	static Matrix NaiveAlgorithmTest(	const size_t row_1, const size_t column_1, 
-										const size_t row_2, const size_t column_2) {
+	static Matrix NaiveAlgorithmTest(const Matrix &A, const Matrix &B) {
 
 		cout << "Begin: Naive" << endl;
-		Matrix matrix_1(row_1, column_1);
-		Matrix matrix_2(row_2, column_2);
 
-		matrix_1.randomMatrix();
-		matrix_2.randomMatrix();
+		// A.printMatrix();
+		// B.printMatrix();
 
-		// matrix_1.printMatrix();
-		// matrix_2.printMatrix();
+		Matrix result = MatrixAlgorithms::NaiveAlgorithm(A, B);
 
-		Matrix result = MatrixAlgorithms::NaiveAlgorithm(matrix_1, matrix_2);
-
-		//result.printMatrix();
+		result.saveCSV("result_Naive_Alorithm.csv");
 
 		return result;
 	}
 
 	//Tests the Strassen Algorithm
-	static Matrix StrassenAlgorithmTest(const size_t row_1, const size_t column_1, 
-										const size_t row_2, const size_t column_2) {
+	static Matrix StrassenAlgorithmTest(const Matrix &A, const Matrix &B) {
 	
 		cout << "Begin: Strassen" << endl;
-		Matrix matrix_1(row_1, column_1);
-		Matrix matrix_2(row_2, column_2);
 
-		matrix_1.randomMatrix();
-		matrix_2.randomMatrix();
+		// A.printMatrix();
+		// B.printMatrix();
 
-		// matrix_1.printMatrix();
-		// matrix_2.printMatrix();
+		Matrix result = MatrixAlgorithms::StrassenAlgorithm(A, B);
 
-		Matrix result = MatrixAlgorithms::StrassenAlgorithm(matrix_1, matrix_2);
-
-		//result.printMatrix();
+		result.saveCSV("result_Strassen_Alorithm.csv");
 
 		return result;
 	}
@@ -362,11 +374,10 @@ public:
 
 //Displays program execution time
 template <typename Func>
-void measureExecutionTime(Func algorithmTest, 	const size_t row_1, const size_t column_1, 
-												const size_t row_2, const size_t column_2) {
+void measureExecutionTime(Func algorithmTest, const Matrix &matrix_1, const Matrix &matrix_2) {
 
 	auto start = std::chrono::high_resolution_clock::now();
-	algorithmTest(row_1, row_2, column_1, column_2);
+	algorithmTest(matrix_1, matrix_2);
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     cout << "Total Duration: " << duration.count() << "ms" << endl;
@@ -374,13 +385,19 @@ void measureExecutionTime(Func algorithmTest, 	const size_t row_1, const size_t 
 
 
 int main() {
-	size_t row_1 = 64;
-	size_t column_1 = 64;
-	size_t row_2 = 64;
-	size_t column_2 = 64;
+	size_t row_1 = 512;
+	size_t column_1 = 512;
+	size_t row_2 = 512;
+	size_t column_2 = 512;
 
-	Matrix Naive_Matrix = MatrixTests::NaiveAlgorithmTest(row_1, column_1, row_2, column_2);
-	Matrix Strassen_Matrix = MatrixTests::StrassenAlgorithmTest(row_1, column_1, row_2, column_2);
+	Matrix matrix_1(row_1, column_1);
+	Matrix matrix_2(row_2, column_2);
+
+	matrix_1.randomMatrix();
+	matrix_2.randomMatrix();
+
+	Matrix Naive_Matrix = MatrixTests::NaiveAlgorithmTest(matrix_1, matrix_2);
+	Matrix Strassen_Matrix = MatrixTests::StrassenAlgorithmTest(matrix_1, matrix_2);
 
 	Naive_Matrix.saveCSV("Naive_data.csv");
 	Strassen_Matrix.saveCSV("Strassen_data.csv");
@@ -388,12 +405,13 @@ int main() {
 	//Naive_Matrix.printMatrix();
 	//Strassen_Matrix.printMatrix();
 
-	// measureExecutionTime(MatrixTests::NaiveAlgorithmTest, row_1, column_1, row_2, column_2);
-	// measureExecutionTime(MatrixTests::StrassenAlgorithmTest, row_1, column_1, row_2, column_2);
+	// measureExecutionTime(MatrixTests::NaiveAlgorithmTest, matrix_1, matrix_2);
+	// measureExecutionTime(MatrixTests::StrassenAlgorithmTest, matrix_1, matrix_2);
 
-	// cout << (Naive_Matrix.isEqual(Strassen_Matrix)) << endl;
-	// Matrix difference = Naive_Matrix - Strassen_Matrix;
-	// difference.printMatrix();
+	//First 15 lines came from this...
+	//cout << (Naive_Matrix.isEqual(Strassen_Matrix)) << endl;
+	//Matrix difference = Naive_Matrix - Strassen_Matrix;
+	//difference.printMatrix();
 
 	return 0;
 
