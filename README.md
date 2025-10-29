@@ -1,4 +1,4 @@
-#Matrix Multiplication (Naive vs Strassen Algorithm)
+Matrix Multiplication (Naive vs Strassen Algorithm)
 This project implements and compares two matrix multiplication algorithms in C++: the Naive method and the Strassen algorithm. It benchmarks their performance and saves results to CSV files for further analysis.
 
 Features
