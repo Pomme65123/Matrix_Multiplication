@@ -1,18 +1,4 @@
 //NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
-//NOTE NEVER EVER EVER TRY AND DEBUG WITH A MATRIX GENERATOR INSIDE THE TEST CASE
 
 #include <chrono>
 #include <iostream>
@@ -41,11 +27,11 @@ public:
 	vector<vector<double>> &getData() {return data;}
 	const vector<vector<double>> &getData() const {return data;}
 
-	double& operator()(size_t i, size_t j) {
+	double &operator()(size_t i, size_t j) {
         return data[i][j];
     }
 
-    const double& operator()(size_t i, size_t j) const {
+    const double &operator()(size_t i, size_t j) const {
         return data[i][j];
     }
 
@@ -108,28 +94,8 @@ public:
 		return make_pair(padded_A, padded_B);
 	}
 
-	bool isEqual(const Matrix &other, double epsilon = 1e-9, double absTol = 1e-12) const {
-		if (numRows() != other.numRows() || numColumns() != other.numColumns()) {
-			return false;
-		}
-		for (size_t i = 0; i < numRows(); i++) {
-			for (size_t j = 0; j < numColumns(); j++) {
-				double a = (*this)(i, j);
-				double b = other(i, j);
-				double diff = fabs(a - b);
-				if (diff > absTol) {
-					double maxAB = max(fabs(a), fabs(b));
-					if(diff > maxAB * epsilon) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-	Matrix subtract(const Matrix &other) const {
-		if (numRows() != other.numRows() || numColumns() != other.numColumns()) {
+	Matrix operator-(const Matrix &other) const {
+    	if (numRows() != other.numRows() || numColumns() != other.numColumns()) {
 			throw std::invalid_argument("Matrix dimensions must match for subtraction.");
 		}
 		Matrix result(numRows(), numColumns());
@@ -139,10 +105,6 @@ public:
 			}
 		}
 		return result;
-	}
-
-	Matrix operator-(const Matrix &other) const {
-    	return subtract(other);
 	}
 
 	void saveCSV(const string &filename, int precision = 6) const {
@@ -402,13 +364,16 @@ int main() {
 	Naive_Matrix.saveCSV("Naive_data.csv");
 	Strassen_Matrix.saveCSV("Strassen_data.csv");
 
+	Matrix difference = Naive_Matrix - Strassen_Matrix;
+	difference.printMatrix();
+
+
 	//Naive_Matrix.printMatrix();
 	//Strassen_Matrix.printMatrix();
 
 	// measureExecutionTime(MatrixTests::NaiveAlgorithmTest, matrix_1, matrix_2);
 	// measureExecutionTime(MatrixTests::StrassenAlgorithmTest, matrix_1, matrix_2);
 
-	//First 15 lines came from this...
 	//cout << (Naive_Matrix.isEqual(Strassen_Matrix)) << endl;
 	//Matrix difference = Naive_Matrix - Strassen_Matrix;
 	//difference.printMatrix();
