@@ -32,5 +32,5 @@ cd MatrixMultiplication
 ```
 Compile:
 ```
-g++ -std=c++17 -O2 main.cpp -o matrix_mult
+g++ -std=c++17 main.cpp -o matrix_mult
 ```
