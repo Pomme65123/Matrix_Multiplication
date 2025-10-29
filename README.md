@@ -20,7 +20,7 @@ Naive Matrix Multiplication
   -Iterates through all element combinations using three nested loops
 
 Strassen Matrix Multiplication
-  -Divide-and-conquer method with complexity O(n<sup>log⁡<sub>2</sub>7</sup>) ≈ O(n<sup>2.81<sup>)
+  -Divide-and-conquer method with complexity O(n<sup>log⁡<sub>2</sub>7</sup>) ≈ O(n)
   -Recursively splits matrices into quadrants
   -Reduces the number of multiplications from 8 to 7 per recursion step
   -Automatically switches to Naive algorithm for small matrices (size ≤ 64)
