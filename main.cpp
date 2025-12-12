@@ -5,10 +5,9 @@
 #include <utility>
 #include <cassert>
 #include <cmath>
-#include <limits>
 #include <fstream>
 #include <iomanip>
-
+#include <functional>
 
 using namespace std;
 
@@ -40,8 +39,8 @@ public:
 
 		Matrix result(numRows(), numColumns());
 
-		for (size_t i = 0; i < numRows(); ++i) {
-			for (size_t j = 0; j < numColumns(); ++j) {
+		for (size_t i = 0; i < numRows(); i++) {
+			for (size_t j = 0; j < numColumns(); j++) {
 				result(i, j) = (*this)(i, j) + other(i, j);
 			}
 		}
@@ -56,8 +55,8 @@ public:
 
 		Matrix result(numRows(), numColumns());
 
-		for (size_t i = 0; i < numRows(); ++i) {
-			for (size_t j = 0; j < numColumns(); ++j) {
+		for (size_t i = 0; i < numRows(); i++) {
+			for (size_t j = 0; j < numColumns(); j++) {
 				result(i, j) = (*this)(i, j) - other(i, j);
 			}
 		}
@@ -308,22 +307,22 @@ public:
 
 
 //Displays program execution time
-template <typename Func>
-void measureExecutionTime(Func algorithmTest, const Matrix &matrix_1, const Matrix &matrix_2) {
+template <typename Func, typename... Args>
+auto measureExecutionTime(Func&& algorithmTest, Args &&... args) {
 
-	auto start = std::chrono::high_resolution_clock::now();
-	algorithmTest(matrix_1, matrix_2);
-	auto end = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    cout << "Total Duration: " << duration.count() << "ms" << endl;
+	auto start = std::chrono::steady_clock::now();
+    std::invoke(std::forward<Func>(algorithmTest), std::forward<Args>(args)...);
+    auto end = std::chrono::steady_clock::now();
+    
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 }
 
 
 int main() {
-	size_t row_1 = 512;
-	size_t column_1 = 512;
-	size_t row_2 = 512;
-	size_t column_2 = 512;
+	size_t row_1 = 2048;
+	size_t column_1 = 2048;
+	size_t row_2 = 2048;
+	size_t column_2 = 2048;
 
 	Matrix matrix_1(row_1, column_1);
 	Matrix matrix_2(row_2, column_2);
@@ -331,11 +330,17 @@ int main() {
 	matrix_1.randomMatrix();
 	matrix_2.randomMatrix();
 
-	Matrix Naive_Matrix = MatrixTests::NaiveAlgorithmTest(matrix_1, matrix_2);
-	Matrix Strassen_Matrix = MatrixTests::StrassenAlgorithmTest(matrix_1, matrix_2);
+	// Matrix Naive_Matrix = MatrixTests::NaiveAlgorithmTest(matrix_1, matrix_2);
+	// Matrix Strassen_Matrix = MatrixTests::StrassenAlgorithmTest(matrix_1, matrix_2);
 
-	Naive_Matrix.saveCSV("Naive_data.csv");
-	Strassen_Matrix.saveCSV("Strassen_data.csv");
+	// Naive_Matrix.saveCSV("Naive_data.csv");
+	// Strassen_Matrix.saveCSV("Strassen_data.csv");
+
+	auto naiveTime = measureExecutionTime(MatrixTests::NaiveAlgorithmTest, matrix_1, matrix_2);
+    cout << "Naive Algorithm Execution Time: " << naiveTime.count() << " ms" << endl;
+
+    auto strassenTime = measureExecutionTime(MatrixTests::StrassenAlgorithmTest, matrix_1, matrix_2);
+    cout << "Strassen Algorithm Execution Time: " << strassenTime.count() << " ms" << endl;
 
 	return 0;
 
