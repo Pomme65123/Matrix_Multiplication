@@ -357,10 +357,10 @@ auto measureExecutionTime(Func&& algorithmTest, Args &&... args) {
 }
 
 int main() {
-	size_t row_1 = 2048/2;
-	size_t column_1 = 2048/2;
-	size_t row_2 = 2048/2;
-	size_t column_2 = 2048/2;
+	size_t row_1 = 2048;
+	size_t column_1 = 2048;
+	size_t row_2 = 2048;
+	size_t column_2 = 2048;
 
 	Matrix matrix_1(row_1, column_1);
 	Matrix matrix_2(row_2, column_2);
