@@ -16,7 +16,6 @@ A high-performance C++ implementation comparing naive matrix multiplication with
 - **Padding Optimization**: Efficient power-of-2 padding using bit operations
 
 ### Performance Features
-- **Compiler Optimization Ready**: Compatible with `-O3`, `-march=native`, `-funroll-loops`, `-ffast-math`
 - **Modern C++ Standards**: Supports C++23 features
 - **Zero-Copy Operations**: Minimized temporary object creation in recursive calls
 
@@ -37,22 +36,7 @@ Matrix_Multiplication/
 
 ### Basic Compilation
 ```bash
-g++ main.cpp -o matrix_mult.exe
-```
-
-### Optimized Compilation (Recommended)
-```bash
-g++ -std=c++23 -O3 -march=native -funroll-loops -ffast-math main.cpp -o matrix_mult_optimized.exe
-```
-
-### For C++23 Compatibility
-```bash
-g++ -std=c++23 -O3 -march=native main.cpp -o matrix_mult.exe
-```
-
-### Running the Program
-```bash
-./matrix_mult.exe
+g++ -std=c++23 main.cpp
 ```
 
 ## Performance Testing
@@ -101,13 +85,7 @@ Measure-Command {.\matrix_mult.exe}
 
 ## Current Configuration
 
-The program currently tests with 512×512 matrices (`2048/4`):
-```cpp
-size_t row_1 = 2048/2;    // 512
-size_t column_1 = 2048/2; // 512
-size_t row_2 = 2048/2;    // 512 
-size_t column_2 = 2048/2; // 512
-```
+The program currently tests with 2048x2048 matrices:
 
 ## Expected Performance Gains
 
@@ -124,7 +102,7 @@ size_t column_2 = 2048/2; // 512
 ## Technical Requirements
 
 - **C++ Compiler**: GCC 9+ or equivalent with C++23 support
-- **Memory**: Sufficient RAM for matrix storage (512×512 ≈ 2MB per matrix)
+- **Memory**: Sufficient RAM for matrix storage
 - **Platform**: Cross-platform compatible (Windows, Linux, macOS)
 
 ## Output Files
@@ -133,21 +111,6 @@ All results are saved as CSV files in the `data/` directory:
 - High precision (6 decimal places by default)
 - Standard comma-separated format
 - Compatible with Excel, MATLAB, Python pandas
-
-## Advanced Usage
-
-### Custom Matrix Sizes
-Modify the size constants in `main()`:
-```cpp
-size_t row_1 = 1024;    // Custom size
-size_t column_1 = 1024;
-```
-
-### Precision Control
-Adjust CSV output precision:
-```cpp
-result.saveCSV("output.csv", 10);  // 10 decimal places
-```
 
 ### Algorithm Selection
 The Strassen algorithm automatically chooses the best approach:
