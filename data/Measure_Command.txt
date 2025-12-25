@@ -1,0 +1,29 @@
+For an array of size 1024x1024
+
+NEW CODE:
+
+Days              : 0
+Hours             : 0
+Minutes           : 0
+Seconds           : 15
+Milliseconds      : 617
+Ticks             : 156172637
+TotalDays         : 0.000180755366898148
+TotalHours        : 0.00433812880555556
+TotalMinutes      : 0.260287728333333
+TotalSeconds      : 15.6172637
+TotalMilliseconds : 15617.2637
+
+OLD CODE:
+
+Days              : 0
+Hours             : 0
+Minutes           : 0
+Seconds           : 47
+Milliseconds      : 488
+Ticks             : 474881520
+TotalDays         : 0.000549631388888889
+TotalHours        : 0.0131911533333333  
+TotalMinutes      : 0.7914692
+TotalSeconds      : 47.488152
+TotalMilliseconds : 47488.152

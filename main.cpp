@@ -8,29 +8,45 @@
 #include <fstream>
 #include <iomanip>
 #include <functional>
-
+#include <algorithm>
+#include <algorithm>
 using namespace std;
 
 class Matrix {
-private:
-	vector<vector<double>> data;
-
 public:
-	Matrix() : data(0, vector<double>(0)) {}
-	Matrix(size_t rows, size_t columns) : data(rows, vector<double>(columns, 0.0)) {}
-	size_t numRows() const {return data.size();}
-	size_t numColumns() const {return data[0].size();}
+	vector<double> data;
+	size_t rows, cols;
+	Matrix() : data(), rows(0), cols(0) {}
+	Matrix(size_t rows, size_t columns) : data(rows * columns, 0.0), rows(rows), cols(columns) {}
+	
+	Matrix(Matrix&& other) noexcept : data(std::move(other.data)), rows(other.rows), cols(other.cols) {
+		other.rows = other.cols = 0;
+	}
+	
+	Matrix& operator=(Matrix&& other) noexcept {
+		if (this != &other) {
+			data = std::move(other.data);
+			rows = other.rows;
+			cols = other.cols;
+			other.rows = other.cols = 0;
+		}
+		return *this;
+	}
+	
+	size_t numRows() const noexcept { return rows; }
+	size_t numColumns() const noexcept { return cols; }
+	bool empty() const noexcept { return data.empty(); }
 
-	vector<vector<double>> &getData() {return data;}
-	const vector<vector<double>> &getData() const {return data;}
+	double& operator()(size_t i, size_t j) noexcept {
+		return data[i * cols + j];
+	}
 
-	double &operator()(size_t i, size_t j) {
-        return data[i][j];
-    }
-
-    const double &operator()(size_t i, size_t j) const {
-        return data[i][j];
-    }
+	const double& operator()(size_t i, size_t j) const noexcept {
+		return data[i * cols + j];
+	}
+	
+	double* rawData() noexcept { return data.data(); }
+	const double* rawData() const noexcept { return data.data(); }
 
     Matrix operator+(const Matrix &other) const {
     	if (numRows() != other.numRows() || numColumns() != other.numColumns()) {
@@ -39,9 +55,9 @@ public:
 
 		Matrix result(numRows(), numColumns());
 
-		for (size_t i = 0; i < numRows(); i++) {
-			for (size_t j = 0; j < numColumns(); j++) {
-				result(i, j) = (*this)(i, j) + other(i, j);
+		for (auto col{0uz}; col < numColumns(); col++) {
+			for (auto row{0uz}; row < numRows(); row++) {
+				result(row, col) = (*this)(row, col) + other(row, col);
 			}
 		}
 
@@ -55,9 +71,9 @@ public:
 
 		Matrix result(numRows(), numColumns());
 
-		for (size_t i = 0; i < numRows(); i++) {
-			for (size_t j = 0; j < numColumns(); j++) {
-				result(i, j) = (*this)(i, j) - other(i, j);
+		for (auto col{0uz}; col < numColumns(); col++) {
+			for (auto row{0uz}; row < numRows(); row++) {
+				result(row, col) = (*this)(row, col) - other(row, col);
 			}
 		}
 
@@ -72,51 +88,51 @@ public:
 		std::mt19937 gen(rd());
 		std::uniform_real_distribution<double> dis(0, 10);
 
-		for (size_t i = 0; i < numRows(); i++) {
-			for (size_t j = 0; j < numColumns(); j++) {
-			  data[i][j] = dis(gen);
-			}
+		double* ptr = data.data();
+		const size_t size = data.size();
+		for (auto i{0uz}; i < size; ++i) {
+			ptr[i] = dis(gen);
 		}
 	}
 
 	//Checks if it's a square matrix
-	bool checkSquare() const {
-		if (numRows() != numColumns()) {
-			return 0;
-		}
-		return 1;
+	bool checkSquare() const noexcept {
+		return rows == cols;
 	}
 
 	//Padding to square matrices
 	static pair<Matrix,Matrix> padding(const Matrix &A, const Matrix &B) {
 
-		if (A.numColumns() != B.numRows()) {
+		if (A.cols != B.rows) {
 		    throw std::invalid_argument("Invalid matrix multiplication");
 		}
 
-		size_t row_A = A.numRows();
-		size_t column_A = A.numColumns();
-		size_t column_B = B.numColumns();
+		size_t row_A = A.rows;
+		size_t column_A = A.cols;
+		size_t column_B = B.cols;
 
-		size_t newSize = max(row_A, max(column_A, column_B));
-		newSize = static_cast<size_t> (pow(2, ceil(log2(newSize))));
+		size_t newSize = std::max({row_A, column_A, column_B});
+		// Find next power of 2
+		newSize = static_cast<size_t>(1) << static_cast<size_t>(ceil(log2(newSize)));
 
 		Matrix padded_A(newSize, newSize);
 		Matrix padded_B(newSize, newSize);
 
-		for (size_t i = 0; i < row_A; i++) {
-			for (size_t j = 0; j < column_A; j++) {
-				padded_A(i,j) = A(i,j);
-			}
+		const double* srcA = A.data.data();
+		double* dstA = padded_A.data.data();
+		for (auto row{0uz}; row < row_A; row++) {
+			std::copy(srcA + row * column_A, srcA + (row + 1) * column_A, 
+			         dstA + row * newSize);
 		}
 
-		for (size_t i = 0; i < column_A; i++) {
-			for (size_t j = 0; j < column_B; j++) {
-				padded_B(i,j) = B(i,j);
-			}
+		const double* srcB = B.data.data();
+		double* dstB = padded_B.data.data();
+		for (auto col{0uz}; col < column_A; col++) {
+			std::copy(srcB + col * column_B, srcB + (col + 1) * column_B, 
+			         dstB + col * newSize);
 		}
 
-		return make_pair(padded_A, padded_B);
+		return make_pair(std::move(padded_A), std::move(padded_B));
 	}
 
 	void saveCSV(const string &filename, int precision = 6) const {
@@ -129,11 +145,12 @@ public:
 		}
 
 		file << fixed << setprecision(precision);
+		const double* ptr = data.data();
 
-		for (size_t i = 0; i < numRows(); i++) {
-			for (size_t j = 0; j < numColumns(); j++) {
-				file << (*this)(i, j);
-				if (j != numColumns() - 1) {
+		for (auto col{0uz}; col < cols; col++) {
+			for (auto row{0uz}; row < rows; row++) {
+				file << ptr[row * cols + col];
+				if (col != cols - 1) {
 					file << ",";
 				}
 			}
@@ -146,9 +163,9 @@ public:
 
 
 ostream &operator<<(ostream &out, const Matrix &other) {
-	for (size_t i = 0; i < other.numRows(); i++) {
-		for (size_t j = 0; j < other.numColumns(); j++) {
-			out << "Position: (" << i << "," << j << "): " << other(i,j) << endl;
+	for (auto col{0uz}; col < other.cols; col++) {
+		for (auto row{0uz}; row < other.rows; row++) {
+			out << "Position: (" << row << "," << col << "): " << other(row,col) << endl;
 		}
 	}
 	return out;
@@ -159,27 +176,35 @@ ostream &operator<<(ostream &out, const Matrix &other) {
 class MatrixAlgorithms {
 public:
 	//Uses the Naive Algorithm for matrix multiplication
-	static Matrix NaiveAlgorithm(	const Matrix &A, 
-									const Matrix &B) {
+	static Matrix NaiveAlgorithm(const Matrix &A, const Matrix &B) {
 
 		//https://en.wikipedia.org/wiki/Matrix_multiplication
 
-		if (A.getData().empty() || B.getData().empty() || A.numColumns() != B.numRows()) {
-		cout << "Invalid matrix multiplication" << endl;
+		if (A.empty() || B.empty() || A.cols != B.rows) {
+			cout << "Invalid matrix multiplication" << endl;
 			return Matrix(0,0);
 		}
 
-		size_t rowsA = A.numRows();
-		size_t colsA = A.numColumns();
-		size_t colsB = B.numColumns();
+		const size_t rowsA = A.rows;
+		const size_t colsA = A.cols;
+		const size_t colsB = B.cols;
 
 		Matrix result(rowsA, colsB);
+		
 
-		for (size_t i = 0; i < rowsA; i++) {
-			for (size_t k = 0; k < colsA; k++) {
-				double temp = A(i,k);
-			  for (size_t j = 0; j < colsB; j++)
-			    result(i,j) += temp * B(k,j);
+		const double* aPtr = A.data.data();
+		const double* bPtr = B.data.data();
+		double* resPtr = result.data.data();
+
+		for (auto col_A{0uz}; col_A < colsA; col_A++) {
+			for (auto row{0uz}; row < rowsA; row++) {
+				const double aik = aPtr[row * colsA + col_A];
+				const double* bRow = bPtr + col_A * colsB;
+				double* resRow = resPtr + row * colsB;
+				
+				for (auto col_B{0uz}; col_B < colsB; col_B++) {
+					resRow[col_B] += aik * bRow[col_B];
+				}
 			}
 		}
 
@@ -192,39 +217,45 @@ public:
 		//https://www.cise.ufl.edu/~sahni/papers/strassen.pdf
 		//matrix size > 64
 
-		if (A.getData().empty() || B.getData().empty() || A.numColumns() != B.numRows()) {
+		if (A.empty() || B.empty() || A.cols != B.rows) {
 			cout << "Invalid matrix multiplication" << endl;
 			return Matrix(0,0);
 		}
 
 		auto [padded_A, padded_B] = Matrix::padding(A, B);
 
-		size_t n = padded_A.numRows();
+		size_t size_padded = padded_A.rows;
 
-		if (n <= 64) {
+		if (size_padded <= 128) {  // Isize_paddedcreased threshold for better performance
 			Matrix fullResult = NaiveAlgorithm(padded_A, padded_B);
-			Matrix finalResult(A.numRows(), B.numColumns());
-			for (size_t i = 0; i < A.numRows(); i++) {
-				for (size_t j = 0; j < B.numColumns(); j++) {
-					finalResult(i, j) = fullResult(i, j);
-				}
+			Matrix finalResult(A.rows, B.cols);
+			
+			// Optimized copying with raw pointers
+			const double* srcPtr = fullResult.data.data();
+			double* dstPtr = finalResult.data.data();
+			for (auto row{0uz}; row < A.rows; row++) {
+				std::copy(srcPtr + row * fullResult.cols, 
+				         srcPtr + row * fullResult.cols + B.cols,
+				         dstPtr + row * B.cols);
 			}
 			return finalResult;
 		}
 	
+		// Optimized subMatrix with move semantics
 		auto subMatrix = [](const Matrix &M, size_t row, size_t column, size_t size) {
-			assert(row + size <= M.numRows());
-			assert(column + size <= M.numColumns());
 			Matrix result(size, size);
-			for (size_t i = 0; i < size; i++) {
-				for (size_t j = 0; j < size; j++) {
-					result(i,j) = M(row + i, column + j);
-				}
+			const double* srcPtr = M.data.data();
+			double* dstPtr = result.data.data();
+			
+			for (auto i{0uz}; i < size; i++) {
+				std::copy(srcPtr + (row + i) * M.cols + column,
+				         srcPtr + (row + i) * M.cols + column + size,
+				         dstPtr + i * size);
 			}
 			return result;
 		};
 
-		size_t k = n/2;
+		size_t k = size_padded/2;
 
 		Matrix A11 = subMatrix(padded_A, 0, 0, k);
 		Matrix A12 = subMatrix(padded_A, 0, k, k);
@@ -236,36 +267,46 @@ public:
 		Matrix B21 = subMatrix(padded_B, k, 0, k);
 		Matrix B22 = subMatrix(padded_B, k, k, k);
 
-		Matrix M1 = StrassenAlgorithm((A11 + A22), (B11 + B22));
-		Matrix M2 = StrassenAlgorithm((A21 + A22), B11);
-		Matrix M3 = StrassenAlgorithm(A11, (B12 - B22));
-		Matrix M4 = StrassenAlgorithm(A22, (B21 - B11));
-		Matrix M5 = StrassenAlgorithm((A11 + A12), B22);
-		Matrix M6 = StrassenAlgorithm((A21 - A11), (B11 + B12));
-		Matrix M7 = StrassenAlgorithm((A12 - A22), (B21 + B22));
+		Matrix M1 = StrassenAlgorithm(A11 + A22, B11 + B22);
+		Matrix M2 = StrassenAlgorithm(A21 + A22, B11);
+		Matrix M3 = StrassenAlgorithm(A11, B12 - B22);
+		Matrix M4 = StrassenAlgorithm(A22, B21 - B11);
+		Matrix M5 = StrassenAlgorithm(A11 + A12, B22);
+		Matrix M6 = StrassenAlgorithm(A21 - A11, B11 + B12);
+		Matrix M7 = StrassenAlgorithm(A12 - A22, B21 + B22);
 
-		Matrix C11 = (((M1 + M4) - M5) + M7);
-		Matrix C12 = (M3 + M5);
-		Matrix C21 = (M2 + M4);
-		Matrix C22 = (((M1 - M2) + M3) + M6);
+		Matrix C11 = M1 + M4 - M5 + M7;
+		Matrix C12 = M3 + M5;
+		Matrix C21 = M2 + M4;
+		Matrix C22 = M1 - M2 + M3 + M6;
 
-		Matrix result(padded_A.numRows(), padded_A.numColumns());
-
-		for(size_t i = 0; i < k; i++) {
-			for (size_t j = 0; j < k; j++) {
-				result(i,j) = C11(i,j);
-				result(i, j + k) = C12(i, j);
-				result(i + k, j) = C21(i, j);
-				result(i + k, j + k) = C22(i, j);
-			}
+		Matrix result(padded_A.rows, padded_A.cols);
+		
+		double* resultPtr = result.data.data();
+		const double* c11Ptr = C11.data.data();
+		const double* c12Ptr = C12.data.data();
+		const double* c21Ptr = C21.data.data();
+		const double* c22Ptr = C22.data.data();
+		
+		for(auto i{0uz}; i < k; ++i) {
+			std::copy(c11Ptr + i * k, c11Ptr + (i + 1) * k, 
+			         resultPtr + i * result.cols);
+			std::copy(c12Ptr + i * k, c12Ptr + (i + 1) * k, 
+			         resultPtr + i * result.cols + k);
+			         
+			std::copy(c21Ptr + i * k, c21Ptr + (i + 1) * k, 
+			         resultPtr + (i + k) * result.cols);
+			std::copy(c22Ptr + i * k, c22Ptr + (i + 1) * k, 
+			         resultPtr + (i + k) * result.cols + k);
 		}
 
-		Matrix finalResult(A.numRows(), B.numColumns());
-
-		for (size_t i = 0; i < finalResult.numRows(); i++) {
-			for (size_t j = 0; j < finalResult.numColumns(); j++) {
-				finalResult(i, j) = result(i, j);
-			}
+		Matrix finalResult(A.rows, B.cols);
+		const double* srcPtr = result.data.data();
+		double* dstPtr = finalResult.data.data();
+		for (auto row{0uz}; row < A.rows; row++) {
+			std::copy(srcPtr + row * result.cols, 
+			         srcPtr + row * result.cols + B.cols,
+			         dstPtr + row * B.cols);
 		}
 
 		return finalResult;
@@ -304,8 +345,6 @@ public:
 };
 
 
-
-
 //Displays program execution time
 template <typename Func, typename... Args>
 auto measureExecutionTime(Func&& algorithmTest, Args &&... args) {
@@ -317,12 +356,11 @@ auto measureExecutionTime(Func&& algorithmTest, Args &&... args) {
     return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 }
 
-
 int main() {
-	size_t row_1 = 2048;
-	size_t column_1 = 2048;
-	size_t row_2 = 2048;
-	size_t column_2 = 2048;
+	size_t row_1 = 2048/2;
+	size_t column_1 = 2048/2;
+	size_t row_2 = 2048/2;
+	size_t column_2 = 2048/2;
 
 	Matrix matrix_1(row_1, column_1);
 	Matrix matrix_2(row_2, column_2);
@@ -330,17 +368,17 @@ int main() {
 	matrix_1.randomMatrix();
 	matrix_2.randomMatrix();
 
-	// Matrix Naive_Matrix = MatrixTests::NaiveAlgorithmTest(matrix_1, matrix_2);
-	// Matrix Strassen_Matrix = MatrixTests::StrassenAlgorithmTest(matrix_1, matrix_2);
+	Matrix Naive_Matrix = MatrixTests::NaiveAlgorithmTest(matrix_1, matrix_2);
+	Matrix Strassen_Matrix = MatrixTests::StrassenAlgorithmTest(matrix_1, matrix_2);
 
-	// Naive_Matrix.saveCSV("Naive_data.csv");
-	// Strassen_Matrix.saveCSV("Strassen_data.csv");
+	Naive_Matrix.saveCSV("Naive_data.csv");
+	Strassen_Matrix.saveCSV("Strassen_data.csv");
 
-	auto naiveTime = measureExecutionTime(MatrixTests::NaiveAlgorithmTest, matrix_1, matrix_2);
-    cout << "Naive Algorithm Execution Time: " << naiveTime.count() << " ms" << endl;
+	// auto naiveTime = measureExecutionTime(MatrixTests::NaiveAlgorithmTest, matrix_1, matrix_2);
+    // cout << "Naive Algorithm Execution Time: " << naiveTime.count() << " ms" << endl;
 
-    auto strassenTime = measureExecutionTime(MatrixTests::StrassenAlgorithmTest, matrix_1, matrix_2);
-    cout << "Strassen Algorithm Execution Time: " << strassenTime.count() << " ms" << endl;
+    // auto strassenTime = measureExecutionTime(MatrixTests::StrassenAlgorithmTest, matrix_1, matrix_2);
+    // cout << "Strassen Algorithm Execution Time: " << strassenTime.count() << " ms" << endl;
 
 	return 0;
 
