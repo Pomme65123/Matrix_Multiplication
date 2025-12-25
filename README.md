@@ -24,8 +24,8 @@ A high-performance C++ implementation comparing naive matrix multiplication with
 
 ```
 Matrix_Multiplication/
-├── main.cpp                    # Optimized implementation
-├── README.md                   # This file
+├── main.cpp                   # Optimized implementation
+├── README.md                  # This file
 └── data/                      # Output directory
     ├── Naive_data.csv         # Naive algorithm results
     ├── Strassen_data.csv      # Strassen algorithm results
