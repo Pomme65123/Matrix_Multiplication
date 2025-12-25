@@ -24,13 +24,13 @@ A high-performance C++ implementation comparing naive matrix multiplication with
 
 ```
 Matrix_Multiplication/
-├── main.cpp                   # Optimized implementation
-├── README.md                  # This file
-└── data/                      # Output directory
-    ├── Naive_data.csv         # Naive algorithm results
-    ├── Strassen_data.csv      # Strassen algorithm results
-    ├── result_Naive_Alorithm.csv
-    └── result_Strassen_Alorithm.csv
+├── main.cpp                              # Optimized implementation
+├── README.md                             # This file
+└── data/                                 # Output directory
+    ├── Naive_data.csv                    # Randomly Generated Data
+    ├── Strassen_data.csv                 # Randomly Generated Data
+    ├── result_Naive_Alorithm.csv         # Naive algorithm results
+    └── result_Strassen_Alorithm.csv      # Strassen algorithm results
 ```
 
 ## Compilation & Usage
