@@ -53,7 +53,7 @@ cout << "Strassen Algorithm Execution Time: " << strassenTime.count() << " ms" <
 
 ### PowerShell Timing
 ```powershell
-Measure-Command {.\matrix_mult.exe}
+Measure-Command {.\a.out}
 ```
 
 ## Algorithms Implemented
