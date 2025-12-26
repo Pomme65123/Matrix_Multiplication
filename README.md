@@ -83,10 +83,6 @@ Measure-Command {.\a.out}
 - **Square Matrix Detection**: Efficient dimension checking
 - **Automatic Padding**: Power-of-2 padding for Strassen algorithm
 
-## Current Configuration
-
-The program currently tests with 2048x2048 matrices:
-
 ## Expected Performance Gains
 
 ### Memory Access Improvements
